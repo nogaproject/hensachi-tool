@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>偏差値計算ツール｜平均点・標準偏差から簡単計算</title>
+<meta name="description" content="平均点・点数・標準偏差から偏差値を簡単に計算できる無料ツール。スマホ対応で誰でもすぐ使えます。">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+h1 { font-size: 22px; }
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 16px;
+}
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.result {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>偏差値計算ツール</h1>
+
+<input type="number" id="score" placeholder="あなたの点数">
+<input type="number" id="average" placeholder="平均点">
+<input type="number" id="stddev" placeholder="標準偏差">
+
+<button onclick="calc()">計算する</button>
+
+<div class="result" id="result"></div>
+
+<h2>使い方</h2>
+<p>点数・平均点・標準偏差を入力して「計算する」を押してください。</p>
+
+<h2>偏差値とは</h2>
+<p>偏差値は集団の中での位置を示す指標で、平均50として表されます。</p>
+
+<h2>よくある質問</h2>
+<p>Q. 標準偏差がわからない場合？<br> A. 模試などのデータを確認してください。</p>
+
+</div>
+
+<script>
+function calc() {
+  const score = parseFloat(document.getElementById("score").value);
+  const avg = parseFloat(document.getElementById("average").value);
+  const std = parseFloat(document.getElementById("stddev").value);
+
+  if (isNaN(score) || isNaN(avg) || isNaN(std)) {
+    alert("すべて入力してください");
+    return;
+  }
+
+  if (std === 0) {
+    alert("標準偏差は0にできません");
+    return;
+  }
+
+  const hensachi = 50 + 10 * (score - avg) / std;
+  document.getElementById("result").innerText = "偏差値：" + hensachi.toFixed(2);
+}
+</script>
+
+</body>
+</html>
