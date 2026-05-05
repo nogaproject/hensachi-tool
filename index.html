@@ -2,1013 +2,563 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>偏差値計算ツール｜平均点・標準偏差から簡単計算</title>
-  <meta name="description" content="平均点・個人の点数・標準偏差を入力するだけで偏差値を瞬時に計算。受験生・学生必携の無料偏差値計算ツール。計算式の解説・使い方・FAQも完備。">
-  <meta name="keywords" content="偏差値,偏差値計算,偏差値計算ツール,偏差値計算機,標準偏差,平均点">
-  <meta property="og:title" content="偏差値計算ツール｜平均点・標準偏差から簡単計算">
-  <meta property="og:description" content="平均点・個人の点数・標準偏差を入力するだけで偏差値を瞬時に計算できる無料ツール。">
-  <meta property="og:type" content="website">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --ink: #1a1a2e;
-      --ink-light: #3d3d5c;
-      --paper: #faf9f6;
-      --paper-warm: #f5f0e8;
-      --accent: #c0392b;
-      --accent-light: #e74c3c;
-      --gold: #b8960c;
-      --gold-light: #d4ac0d;
-      --blue-deep: #1a3a5c;
-      --blue-mid: #2c5f8a;
-      --border: #d4cfc4;
-      --shadow: rgba(26,26,46,0.12);
-      --radius: 4px;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background: var(--paper);
-      color: var(--ink);
-      line-height: 1.7;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ─── NOISE TEXTURE OVERLAY ─── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ─── HEADER ─── */
-    header {
-      background: var(--ink);
-      color: var(--paper);
-      padding: 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    header::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--gold), var(--blue-mid));
-    }
-
-    .header-inner {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 48px 24px 40px;
-      position: relative;
-    }
-
-    .header-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(250,249,246,0.45);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-label::before {
-      content: '';
-      display: block;
-      width: 28px;
-      height: 1px;
-      background: rgba(250,249,246,0.3);
-    }
-
-    h1 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: clamp(26px, 5vw, 42px);
-      font-weight: 700;
-      line-height: 1.25;
-      letter-spacing: 0.02em;
-      color: var(--paper);
-      margin-bottom: 16px;
-    }
-
-    h1 span {
-      color: var(--gold-light);
-    }
-
-    .header-desc {
-      font-size: 14px;
-      color: rgba(250,249,246,0.6);
-      font-weight: 300;
-      letter-spacing: 0.03em;
-      max-width: 480px;
-    }
-
-    /* ─── MAIN LAYOUT ─── */
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 48px 24px 80px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ─── CALCULATOR CARD ─── */
-    .calc-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: 0 8px 40px var(--shadow), 0 1px 3px rgba(26,26,46,0.06);
-      overflow: hidden;
-      margin-bottom: 56px;
-      position: relative;
-    }
-
-    .calc-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent), var(--gold));
-    }
-
-    .calc-header {
-      padding: 28px 32px 0;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .calc-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--ink);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .calc-icon svg {
-      width: 20px;
-      height: 20px;
-      fill: var(--gold-light);
-    }
-
-    .calc-title {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    .calc-subtitle {
-      font-size: 12px;
-      color: var(--ink-light);
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.05em;
-    }
-
-    .calc-body {
-      padding: 32px;
-    }
-
-    /* ─── FORMULA DISPLAY ─── */
-    .formula-box {
-      background: var(--paper-warm);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--gold);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 32px;
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      color: var(--ink-light);
-      letter-spacing: 0.03em;
-    }
-
-    .formula-box strong {
-      display: block;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 8px;
-    }
-
-    .formula-text {
-      color: var(--ink);
-      font-size: 15px;
-    }
-
-    /* ─── FORM ─── */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    @media (max-width: 600px) {
-      .form-grid { grid-template-columns: 1fr; gap: 16px; }
-      .calc-body { padding: 24px 20px; }
-      .calc-header { padding: 20px 20px 20px; }
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    label {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      color: var(--ink-light);
-      text-transform: uppercase;
-      font-family: 'DM Mono', monospace;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    label .dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-
-    .dot-avg { background: var(--blue-mid); }
-    .dot-score { background: var(--accent); }
-    .dot-sd { background: var(--gold); }
-
-    input[type="number"] {
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      font-size: 18px;
-      font-family: 'DM Mono', monospace;
-      color: var(--ink);
-      background: var(--paper);
-      transition: border-color 0.2s, box-shadow 0.2s;
-      width: 100%;
-      -moz-appearance: textfield;
-    }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-
-    input[type="number"]:focus {
-      outline: none;
-      border-color: var(--ink);
-      box-shadow: 0 0 0 3px rgba(26,26,46,0.08);
-    }
-
-    input[type="number"].error {
-      border-color: var(--accent-light);
-      background: #fff5f5;
-    }
-
-    .field-hint {
-      font-size: 11px;
-      color: rgba(61,61,92,0.5);
-      font-family: 'DM Mono', monospace;
-    }
-
-    .error-msg {
-      font-size: 11px;
-      color: var(--accent-light);
-      display: none;
-      font-family: 'DM Mono', monospace;
-    }
-
-    /* ─── BUTTON ─── */
-    .btn-calc {
-      width: 100%;
-      padding: 16px;
-      background: var(--ink);
-      color: var(--paper);
-      border: none;
-      border-radius: var(--radius);
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 15px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-calc::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 40%, rgba(184,150,12,0.15) 100%);
-    }
-
-    .btn-calc:hover { background: var(--ink-light); }
-    .btn-calc:active { transform: scale(0.99); }
-
-    /* ─── RESULT ─── */
-    #result-area {
-      display: none;
-      margin-top: 28px;
-      padding-top: 28px;
-      border-top: 1px solid var(--border);
-      animation: fadeUp 0.4s ease;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .result-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--ink-light);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .result-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .result-score-wrap {
-      display: flex;
-      align-items: flex-end;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .result-score {
-      font-family: 'Shippori Mincho', serif;
-      font-size: clamp(64px, 15vw, 96px);
-      font-weight: 800;
-      line-height: 1;
-      color: var(--ink);
-      letter-spacing: -0.02em;
-    }
-
-    .result-unit {
-      font-size: 22px;
-      font-family: 'Shippori Mincho', serif;
-      color: var(--ink-light);
-      margin-bottom: 12px;
-    }
-
-    .result-bar-wrap {
-      margin-bottom: 20px;
-    }
-
-    .result-bar-track {
-      height: 8px;
-      background: var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 6px;
-    }
-
-    .result-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      background: linear-gradient(90deg, var(--blue-mid), var(--accent));
-    }
-
-    .result-bar-labels {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      color: rgba(61,61,92,0.5);
-    }
-
-    .result-rank {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 2px;
-      font-size: 13px;
-      font-weight: 500;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.04em;
-    }
-
-    .result-detail {
-      margin-top: 16px;
-      padding: 14px 16px;
-      background: var(--paper-warm);
-      border-radius: var(--radius);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--ink-light);
-      line-height: 1.8;
-    }
-
-    /* ─── ERROR STATE ─── */
-    #error-area {
-      display: none;
-      margin-top: 20px;
-      padding: 14px 16px;
-      background: #fff5f5;
-      border: 1px solid #f5c6cb;
-      border-left: 3px solid var(--accent);
-      border-radius: var(--radius);
-      font-size: 13px;
-      color: var(--accent);
-      font-family: 'DM Mono', monospace;
-    }
-
-    /* ─── SECTIONS ─── */
-    .section {
-      margin-bottom: 56px;
-    }
-
-    h2 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: clamp(20px, 4vw, 28px);
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    h2::before {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 28px;
-      background: linear-gradient(180deg, var(--accent), var(--gold));
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-
-    /* ─── HOW TO USE ─── */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-    }
-
-    .step {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px 20px;
-      position: relative;
-      transition: box-shadow 0.2s;
-    }
-
-    .step:hover { box-shadow: 0 4px 20px var(--shadow); }
-
-    .step-num {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--accent);
-      margin-bottom: 10px;
-      font-weight: 500;
-    }
-
-    .step h3 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 8px;
-    }
-
-    .step p {
-      font-size: 13px;
-      color: var(--ink-light);
-      line-height: 1.6;
-    }
-
-    /* ─── ABOUT SECTION ─── */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 600px) { .about-grid { grid-template-columns: 1fr; } }
-
-    .about-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-    }
-
-    .about-card h3 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 17px;
-      font-weight: 600;
-      color: var(--ink);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .about-card h3 .tag {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 2px;
-      background: var(--ink);
-      color: var(--paper);
-      letter-spacing: 0.05em;
-    }
-
-    .about-card p, .about-card li {
-      font-size: 14px;
-      color: var(--ink-light);
-      line-height: 1.75;
-    }
-
-    .about-card ul { list-style: none; padding: 0; }
-
-    .about-card li {
-      padding: 6px 0;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .about-card li:last-child { border-bottom: none; }
-
-    .about-card li .score-badge {
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--ink);
-      white-space: nowrap;
-    }
-
-    /* ─── FAQ ─── */
-    .faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .faq-item {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    .faq-question {
-      width: 100%;
-      text-align: left;
-      padding: 20px 24px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: background 0.15s;
-    }
-
-    .faq-question:hover { background: var(--paper-warm); }
-
-    .faq-q-mark {
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .faq-arrow {
-      margin-left: auto;
-      transition: transform 0.25s;
-      font-size: 12px;
-      color: var(--ink-light);
-    }
-
-    .faq-item.open .faq-arrow { transform: rotate(180deg); }
-
-    .faq-answer {
-      display: none;
-      padding: 0 24px 20px 49px;
-      font-size: 14px;
-      color: var(--ink-light);
-      line-height: 1.75;
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-    }
-
-    .faq-item.open .faq-answer { display: block; }
-
-    /* ─── FOOTER ─── */
-    footer {
-      background: var(--ink);
-      color: rgba(250,249,246,0.4);
-      text-align: center;
-      padding: 32px 24px;
-      font-size: 12px;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.05em;
-    }
-
-    /* ─── RANK COLORS ─── */
-    .rank-s  { background: #fff8e1; color: #b8960c; border: 1px solid #d4ac0d; }
-    .rank-a  { background: #fce4ec; color: #c0392b; border: 1px solid #e74c3c; }
-    .rank-b  { background: #e8f5e9; color: #1b5e20; border: 1px solid #4caf50; }
-    .rank-c  { background: #e3f2fd; color: #1a3a5c; border: 1px solid #2c5f8a; }
-    .rank-d  { background: #f3e5f5; color: #4a1459; border: 1px solid #8e24aa; }
-    .rank-e  { background: #fafafa; color: #555; border: 1px solid #bbb; }
-
-    /* ─── SCROLL INDICATOR ─── */
-    .scroll-hint {
-      text-align: center;
-      margin: -24px 0 40px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: rgba(61,61,92,0.4);
-      letter-spacing: 0.1em;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.8; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>偏差値計算ツール｜平均点・標準偏差から簡単計算【無料】</title>
+<meta name="description" content="偏差値を無料でかんたんに計算できるツールです。平均点・個人の点数・標準偏差を入力するだけで偏差値が即座に算出されます。受験生・学生必見の偏差値計算機。計算式の解説・使い方・FAQも掲載。">
+<meta name="keywords" content="偏差値,偏差値計算,偏差値計算ツール,偏差値とは,標準偏差,平均点,偏差値 計算,偏差値計算機">
+<meta property="og:title" content="偏差値計算ツール｜平均点・標準偏差から簡単計算【無料】">
+<meta property="og:description" content="平均点・点数・標準偏差を入力するだけで偏差値を瞬時に計算。無料で使えるシンプルな偏差値計算ツール。">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Opti:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg1:#0f0c29;--bg2:#302b63;--bg3:#24243e;
+  --card:#ffffff;
+  --card-bg:rgba(255,255,255,0.97);
+  --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#8888aa;
+  --accent:#ff6b35;--accent2:#f7c59f;
+  --teal:#00b4d8;--teal2:#90e0ef;
+  --green:#06d6a0;--yellow:#ffd166;--red:#ef476f;
+  --shadow:0 32px 80px rgba(15,12,41,0.45),0 8px 24px rgba(15,12,41,0.25);
+  --radius:20px;--radius-sm:12px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Outfit',sans-serif;
+  min-height:100vh;
+  background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg3) 100%);
+  background-attachment:fixed;
+  color:var(--ink);
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 20% 20%,rgba(0,180,216,0.08) 0%,transparent 50%),
+             radial-gradient(ellipse at 80% 80%,rgba(255,107,53,0.08) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+.page-wrap{
+  max-width:680px;margin:0 auto;
+  padding:48px 20px 80px;
+  position:relative;z-index:1;
+}
+.site-title{
+  text-align:center;
+  margin-bottom:36px;
+  animation:fadeDown .6s ease both;
+}
+.site-title .eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.25em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.45);
+  margin-bottom:12px;
+}
+h1{
+  font-family:'Kaisei Opti',serif;
+  font-size:clamp(22px,5vw,34px);
+  font-weight:700;
+  color:#fff;
+  line-height:1.3;
+  letter-spacing:.01em;
+}
+h1 em{
+  font-style:normal;
+  background:linear-gradient(90deg,var(--teal2),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.tagline{
+  font-size:14px;color:rgba(255,255,255,.5);
+  margin-top:10px;font-weight:300;letter-spacing:.03em;
+}
+.card{
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  margin-bottom:28px;
+  animation:fadeUp .6s ease both;
+}
+.card-top{
+  background:linear-gradient(135deg,#0f0c29,#302b63);
+  padding:24px 32px 20px;
+  display:flex;align-items:center;gap:14px;
+}
+@media(max-width:480px){.card-top{padding:20px 20px 16px}}
+.card-top-icon{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--teal),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:20px;
+}
+.card-top-text .t1{
+  font-size:15px;font-weight:600;color:#fff;letter-spacing:.02em;
+}
+.card-top-text .t2{
+  font-size:12px;color:rgba(255,255,255,.5);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.05em;margin-top:2px;
+}
+.formula-strip{
+  background:linear-gradient(90deg,rgba(0,180,216,.08),rgba(255,107,53,.08));
+  border-top:1px solid rgba(0,180,216,.15);
+  border-bottom:1px solid rgba(0,180,216,.15);
+  padding:12px 32px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;color:var(--ink2);
+  letter-spacing:.03em;
+}
+@media(max-width:480px){.formula-strip{padding:12px 20px;font-size:11.5px}}
+.formula-strip span{color:var(--accent);font-weight:600}
+.form-body{padding:32px}
+@media(max-width:480px){.form-body{padding:24px 20px}}
+.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:520px){.fields{grid-template-columns:1fr;gap:12px}}
+.field{}
+.field label{
+  display:block;
+  font-size:11px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink3);
+  margin-bottom:8px;
+}
+.field label .ldot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  margin-right:5px;vertical-align:middle;
+}
+.d1{background:var(--teal)}.d2{background:var(--accent)}.d3{background:var(--yellow)}
+.input-wrap{position:relative}
+.input-wrap input{
+  width:100%;padding:13px 14px;
+  border:2px solid #e8e8f0;border-radius:var(--radius-sm);
+  font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;
+  color:var(--ink);background:#fafafe;
+  transition:border-color .2s,box-shadow .2s,background .2s;
+  -moz-appearance:textfield;appearance:textfield;
+}
+.input-wrap input::-webkit-inner-spin-button,
+.input-wrap input::-webkit-outer-spin-button{-webkit-appearance:none}
+.input-wrap input::placeholder{color:#c8c8dc;font-weight:400;font-size:15px}
+.input-wrap input:focus{
+  outline:none;border-color:var(--teal);
+  box-shadow:0 0 0 4px rgba(0,180,216,.12);background:#fff;
+}
+.input-wrap input.err{
+  border-color:var(--red);background:#fff5f7;
+  box-shadow:0 0 0 4px rgba(239,71,111,.1);
+}
+.field-hint{font-size:11px;color:var(--ink3);margin-top:6px}
+.field-err{font-size:11px;color:var(--red);margin-top:4px;display:none}
+.btn-calc{
+  width:100%;padding:18px;
+  background:linear-gradient(135deg,#00b4d8,#0077b6);
+  color:#fff;border:none;border-radius:var(--radius-sm);
+  font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;
+  letter-spacing:.06em;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,180,216,.4);
+  transition:transform .15s,box-shadow .15s,filter .15s;
+  position:relative;overflow:hidden;
+}
+.btn-calc::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+}
+.btn-calc:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(0,180,216,.5);filter:brightness(1.06);
+}
+.btn-calc:active{transform:translateY(0);box-shadow:0 4px 12px rgba(0,180,216,.3)}
+.error-banner{
+  display:none;margin-top:16px;
+  padding:14px 18px;border-radius:var(--radius-sm);
+  background:#fff0f3;border:1.5px solid #ffc0cc;
+  color:var(--red);font-size:13px;font-weight:500;
+}
+.result-area{
+  display:none;margin-top:24px;
+  border-top:2px dashed #e8e8f0;padding-top:28px;
+  animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.result-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.result-eyebrow::after{content:'';flex:1;height:1px;background:#e8e8f0}
+.result-main{display:flex;align-items:flex-end;gap:0;margin-bottom:20px}
+.result-num{
+  font-family:'Kaisei Opti',serif;
+  font-size:clamp(72px,18vw,108px);
+  font-weight:700;line-height:1;
+  background:linear-gradient(135deg,var(--teal),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:-.02em;
+}
+.result-unit{font-size:24px;color:var(--ink3);margin-bottom:14px;margin-left:4px}
+.gauge-wrap{margin-bottom:18px}
+.gauge-track{
+  height:10px;background:#eeeef8;border-radius:8px;overflow:hidden;margin-bottom:6px;
+}
+.gauge-fill{
+  height:100%;border-radius:8px;
+  background:linear-gradient(90deg,var(--teal),var(--accent));
+  transition:width .9s cubic-bezier(.16,1,.3,1);width:0%;
+}
+.gauge-labels{
+  display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);
+}
+.rank-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;border-radius:50px;
+  font-size:14px;font-weight:600;letter-spacing:.03em;
+  margin-bottom:16px;
+}
+.rank-s{background:linear-gradient(135deg,#fff8e1,#fffde7);color:#b8960c;border:2px solid #f9d71c}
+.rank-a{background:linear-gradient(135deg,#fce4ec,#fce4ec);color:#c0392b;border:2px solid #e91e63}
+.rank-b{background:linear-gradient(135deg,#e0f7fa,#e0f7fa);color:#006064;border:2px solid #00b4d8}
+.rank-c{background:linear-gradient(135deg,#e8f5e9,#e8f5e9);color:#1b5e20;border:2px solid #06d6a0}
+.rank-d{background:linear-gradient(135deg,#f3e5f5,#f3e5f5);color:#4a148c;border:2px solid #ab47bc}
+.rank-e{background:#f5f5f5;color:#555;border:2px solid #bbb}
+.result-detail{
+  background:linear-gradient(135deg,#f8f8ff,#f0f8ff);
+  border-radius:var(--radius-sm);padding:16px 18px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--ink2);line-height:2;
+}
+.section-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius);padding:36px 40px;
+  margin-bottom:20px;backdrop-filter:blur(8px);
+  animation:fadeUp .6s ease both;
+}
+@media(max-width:480px){.section-card{padding:28px 20px}}
+h2{
+  font-family:'Kaisei Opti',serif;
+  font-size:clamp(18px,3.5vw,24px);
+  font-weight:700;color:#fff;
+  margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;
+}
+h2 .h2bar{
+  width:5px;height:24px;border-radius:3px;
+  background:linear-gradient(180deg,var(--teal),var(--accent));flex-shrink:0;
+}
+h2 .h2icon{font-size:20px}
+.steps-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:480px){.steps-grid{grid-template-columns:1fr}}
+.step-box{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius-sm);padding:18px;transition:background .2s;
+}
+.step-box:hover{background:rgba(255,255,255,.1)}
+.step-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:.15em;color:var(--teal2);margin-bottom:8px;
+}
+.step-box h3{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px}
+.step-box p{font-size:13px;color:rgba(255,255,255,.55);line-height:1.6}
+.about-text{color:rgba(255,255,255,.65);font-size:14px;line-height:1.85;margin-bottom:18px}
+.score-table{width:100%;border-collapse:collapse;font-size:13px}
+.score-table th{
+  background:rgba(0,180,216,.15);color:var(--teal2);
+  padding:10px 14px;text-align:left;font-weight:600;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.05em;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.score-table td{
+  padding:10px 14px;color:rgba(255,255,255,.7);
+  border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;
+}
+.score-table tr:last-child td{border-bottom:none}
+.score-table .badge{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:11px;font-weight:600;
+}
+.faq-list{display:flex;flex-direction:column;gap:2px}
+.faq-item{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius-sm);overflow:hidden;
+}
+.faq-q{
+  width:100%;text-align:left;padding:18px 20px;
+  background:transparent;border:none;cursor:pointer;
+  display:flex;align-items:center;gap:12px;
+  font-family:'Outfit',sans-serif;font-size:14px;
+  font-weight:500;color:#fff;transition:background .15s;
+}
+.faq-q:hover{background:rgba(255,255,255,.06)}
+.faq-q .qmark{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--teal),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#fff;
+}
+.faq-arrow{margin-left:auto;font-size:12px;color:rgba(255,255,255,.4);transition:transform .25s;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg)}
+.faq-a{
+  display:none;padding:0 20px 18px 58px;
+  font-size:14px;color:rgba(255,255,255,.55);line-height:1.75;
+}
+.faq-item.open .faq-a{display:block}
+footer{
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,.25);letter-spacing:.08em;
+  padding-top:12px;
+}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.section-card:nth-child(2){animation-delay:.1s}
+.section-card:nth-child(3){animation-delay:.2s}
+</style>
 </head>
 <body>
+<div class="page-wrap">
 
-<header>
-  <div class="header-inner">
-    <div class="header-label">Free Tool · 無料ツール</div>
-    <h1>偏差値<span>計算</span>ツール</h1>
-    <p class="header-desc">平均点・個人の点数・標準偏差を入力するだけで、偏差値を瞬時に算出します。</p>
-  </div>
-</header>
+<div class="site-title">
+  <p class="eyebrow">Free Calculator · 無料ツール</p>
+  <h1>偏差値<em>計算</em>ツール<br>（平均点・標準偏差対応）</h1>
+  <p class="tagline">3つの数値を入力するだけで偏差値を瞬時に算出</p>
+</div>
 
-<main>
-  <!-- ─── CALCULATOR ─── -->
-  <div class="calc-card" id="calculator">
-    <div class="calc-header">
-      <div class="calc-icon">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v16h10V4H7zm2 2h6v2H9V6zm0 4h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z"/>
-        </svg>
-      </div>
-      <div>
-        <div class="calc-title">偏差値計算フォーム</div>
-        <div class="calc-subtitle">3つの数値を入力してください</div>
-      </div>
-    </div>
-
-    <div class="calc-body">
-      <div class="formula-box">
-        <strong>計算式 / Formula</strong>
-        <span class="formula-text">偏差値 = 50 + 10 × (個人の点数 − 平均点) ÷ 標準偏差</span>
-      </div>
-
-      <div class="form-grid">
-        <div class="field">
-          <label><span class="dot dot-avg"></span>平均点</label>
-          <input type="number" id="avg" placeholder="例：65" step="any">
-          <span class="field-hint">クラス・全体の平均点</span>
-          <span class="error-msg" id="err-avg">平均点を入力してください</span>
-        </div>
-        <div class="field">
-          <label><span class="dot dot-score"></span>個人の点数</label>
-          <input type="number" id="score" placeholder="例：78" step="any">
-          <span class="field-hint">自分が取った点数</span>
-          <span class="error-msg" id="err-score">個人の点数を入力してください</span>
-        </div>
-        <div class="field">
-          <label><span class="dot dot-sd"></span>標準偏差</label>
-          <input type="number" id="sd" placeholder="例：15" step="any" min="0">
-          <span class="field-hint">成績のばらつきを示す値</span>
-          <span class="error-msg" id="err-sd">標準偏差を入力してください</span>
-        </div>
-      </div>
-
-      <button class="btn-calc" onclick="calculate()">偏差値を計算する　→</button>
-
-      <div id="error-area"></div>
-
-      <div id="result-area">
-        <div class="result-label">計算結果</div>
-        <div class="result-score-wrap">
-          <div class="result-score" id="result-value">—</div>
-          <div class="result-unit">点</div>
-        </div>
-
-        <div class="result-bar-wrap">
-          <div class="result-bar-track">
-            <div class="result-bar-fill" id="result-bar" style="width:0%"></div>
-          </div>
-          <div class="result-bar-labels">
-            <span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>70</span><span>80</span>
-          </div>
-        </div>
-
-        <span class="result-rank" id="result-rank"></span>
-
-        <div class="result-detail" id="result-detail"></div>
-      </div>
+<div class="card">
+  <div class="card-top">
+    <div class="card-top-icon">🎯</div>
+    <div class="card-top-text">
+      <div class="t1">偏差値 計算フォーム</div>
+      <div class="t2">hensachi-calculator · v1.0</div>
     </div>
   </div>
-
-  <!-- ─── HOW TO USE ─── -->
-  <div class="section">
-    <h2>使い方</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">STEP 01</div>
-        <h3>平均点を入力</h3>
-        <p>テスト全体の平均点を入力します。成績表や学校からの通知に記載されています。</p>
+  <div class="formula-strip">
+    偏差値 = 50 + 10 × <span>( 点数 − 平均点 )</span> ÷ <span>標準偏差</span>
+  </div>
+  <div class="form-body">
+    <div class="fields">
+      <div class="field">
+        <label><span class="ldot d1"></span>平均点</label>
+        <div class="input-wrap">
+          <input type="number" id="avg" placeholder="65" step="any">
+        </div>
+        <div class="field-hint">テスト全体の平均点</div>
+        <div class="field-err" id="err-avg">平均点を入力してください</div>
       </div>
-      <div class="step">
-        <div class="step-num">STEP 02</div>
-        <h3>個人の点数を入力</h3>
-        <p>自分が取得した点数を入力します。100点満点のテストなら0〜100の範囲で入力してください。</p>
+      <div class="field">
+        <label><span class="ldot d2"></span>個人の点数</label>
+        <div class="input-wrap">
+          <input type="number" id="score" placeholder="78" step="any">
+        </div>
+        <div class="field-hint">自分が取った点数</div>
+        <div class="field-err" id="err-score">点数を入力してください</div>
       </div>
-      <div class="step">
-        <div class="step-num">STEP 03</div>
-        <h3>標準偏差を入力</h3>
-        <p>成績のばらつきを表す値です。成績表に記載されていることが多いです。一般的に10〜20程度です。</p>
-      </div>
-      <div class="step">
-        <div class="step-num">STEP 04</div>
-        <h3>計算ボタンを押す</h3>
-        <p>「偏差値を計算する」ボタンを押すと、偏差値が瞬時に表示されます。</p>
+      <div class="field">
+        <label><span class="ldot d3"></span>標準偏差</label>
+        <div class="input-wrap">
+          <input type="number" id="sd" placeholder="15" step="any" min="0.001">
+        </div>
+        <div class="field-hint">成績のばらつき（σ）</div>
+        <div class="field-err" id="err-sd">標準偏差を入力してください</div>
       </div>
     </div>
-  </div>
-
-  <!-- ─── ABOUT ─── -->
-  <div class="section">
-    <h2>偏差値とは</h2>
-    <div class="about-grid">
-      <div class="about-card">
-        <h3>偏差値の意味 <span class="tag">基礎</span></h3>
-        <p>偏差値とは、集団の中での自分の位置を示す指標です。平均点が50となるよう標準化されており、全体の分布を直感的に把握できます。</p>
-        <br>
-        <p>日本の大学入試や模擬試験で広く使われ、異なる試験の難易度を比較するのに役立ちます。標準偏差が大きいほど点数のばらつきが大きく、偏差値の変動も大きくなります。</p>
+    <button class="btn-calc" onclick="calculate()">偏差値を計算する　→</button>
+    <div class="error-banner" id="error-banner"></div>
+    <div class="result-area" id="result-area">
+      <div class="result-eyebrow">計算結果 / Result</div>
+      <div class="result-main">
+        <div class="result-num" id="res-num">—</div>
+        <div class="result-unit">点</div>
       </div>
-      <div class="about-card">
-        <h3>偏差値の目安</h3>
-        <ul>
-          <li><span>75以上</span><span class="score-badge">🏆 超難関・上位0.6%</span></li>
-          <li><span>70〜74</span><span class="score-badge">🥇 難関・上位2.3%</span></li>
-          <li><span>65〜69</span><span class="score-badge">🥈 やや難関・上位6.7%</span></li>
-          <li><span>60〜64</span><span class="score-badge">🥉 平均以上・上位15.9%</span></li>
-          <li><span>50〜59</span><span class="score-badge">📊 平均付近・上位50%前後</span></li>
-          <li><span>49以下</span><span class="score-badge">📉 平均以下</span></li>
-        </ul>
+      <div class="gauge-wrap">
+        <div class="gauge-track"><div class="gauge-fill" id="gauge"></div></div>
+        <div class="gauge-labels"><span>20</span><span>35</span><span>50</span><span>65</span><span>80</span></div>
       </div>
+      <div><span class="rank-badge" id="rank-badge"></span></div>
+      <div class="result-detail" id="res-detail"></div>
     </div>
   </div>
+</div>
 
-  <!-- ─── FAQ ─── -->
-  <div class="section">
-    <h2>よくある質問（FAQ）</h2>
-    <div class="faq-list">
-      <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span class="faq-q-mark">Q.</span>
-          標準偏差がわからない場合はどうすればいいですか？
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="faq-answer">
-          標準偏差は学校や予備校から配布される成績表に記載されていることが多いです。記載がない場合は、先生に問い合わせるか、全員の得点データがあれば自分で計算することができます。一般的な模擬試験では10〜20程度の値であることが多いです。
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span class="faq-q-mark">Q.</span>
-          偏差値50は全体の何%に相当しますか？
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="faq-answer">
-          偏差値50はちょうど平均点に相当します。成績が正規分布に従う場合、偏差値50付近（49〜51）には全体の約7.9%が分布しています。偏差値50以上は上位約50%、つまり全体の真ん中あたりの位置になります。
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span class="faq-q-mark">Q.</span>
-          偏差値が70を超えることはありますか？
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="faq-answer">
-          はい、あります。理論上は上限・下限がなく、非常に高い点数を取れば偏差値80や90も計算上は出ます。ただし、現実的な試験では偏差値75を超えることは非常にまれで、上位約0.6%に相当します。
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span class="faq-q-mark">Q.</span>
-          平均点と同じ点数を取った場合、偏差値はいくつですか？
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="faq-answer">
-          個人の点数と平均点が同じ場合、計算式の「(点数 - 平均点)」の部分がゼロになるため、偏差値は常に50になります。偏差値は平均を基準(50)として相対的な位置を示す指標です。
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span class="faq-q-mark">Q.</span>
-          標準偏差に0や負の値を入力できますか？
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="faq-answer">
-          標準偏差は常に0より大きい正の値でなければなりません。標準偏差が0の場合は全員が同じ点数であることを意味し、偏差値の計算ができません（ゼロ除算エラー）。このツールでは標準偏差が0以下の場合にエラーメッセージを表示します。
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          <span class="faq-q-mark">Q.</span>
-          偏差値と百分位（パーセンタイル）の違いは何ですか？
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="faq-answer">
-          百分位は「自分より下に何%の人がいるか」を直接示します。一方、偏差値は平均を50として標準化した相対的な位置を示します。正規分布を仮定した場合、偏差値60は上位約15.9%（84.1パーセンタイル）に相当します。偏差値は日本特有の指標で、主に教育の分野で使われます。
-        </div>
-      </div>
+<div class="section-card">
+  <h2><span class="h2bar"></span><span class="h2icon">📖</span>使い方</h2>
+  <div class="steps-grid">
+    <div class="step-box">
+      <div class="step-num">STEP 01</div>
+      <h3>平均点を入力する</h3>
+      <p>クラス全体または模試全体の平均点を入力します。成績表や学校からの通知に記載されています。</p>
+    </div>
+    <div class="step-box">
+      <div class="step-num">STEP 02</div>
+      <h3>個人の点数を入力する</h3>
+      <p>自分が取得した得点を入力します。100点満点のテストなら0〜100の整数または小数で入力できます。</p>
+    </div>
+    <div class="step-box">
+      <div class="step-num">STEP 03</div>
+      <h3>標準偏差を入力する</h3>
+      <p>点数のばらつきを示す値（σ）です。成績表に記載されていることが多く、一般的に10〜20程度です。</p>
+    </div>
+    <div class="step-box">
+      <div class="step-num">STEP 04</div>
+      <h3>ボタンを押して確認</h3>
+      <p>「偏差値を計算する」ボタンを押すと偏差値と評価が表示されます。入力ミスはエラーで案内します。</p>
     </div>
   </div>
-</main>
+</div>
+
+<div class="section-card">
+  <h2><span class="h2bar"></span><span class="h2icon">📊</span>偏差値とは</h2>
+  <p class="about-text">
+    偏差値（へんさち）とは、集団全体の中で自分の成績がどの位置にあるかを示す指標です。平均点が常に<strong style="color:#90e0ef">50</strong>となるよう標準化されているため、異なるテスト間でも相対的な位置を比較できます。偏差値 計算に使う標準偏差とは、点数のばらつきの大きさを表す統計値で、全員の点数が同じに近いほど小さくなります。
+  </p>
+  <p class="about-text">
+    偏差値とは本来、正規分布を前提とした統計的指標です。受験や模擬試験で広く使われており、志望校選びや学習計画の基準としても活用されます。
+  </p>
+  <table class="score-table">
+    <thead>
+      <tr><th>偏差値の目安</th><th>評価</th><th>上位%の目安</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>75以上</td><td><span class="badge" style="background:#fff8e1;color:#b8960c">🏆 超難関レベル</span></td><td>上位約0.6%</td></tr>
+      <tr><td>70〜74</td><td><span class="badge" style="background:#fce4ec;color:#c0392b">🥇 難関レベル</span></td><td>上位約2.3%</td></tr>
+      <tr><td>65〜69</td><td><span class="badge" style="background:#e0f7fa;color:#006064">🥈 やや難関</span></td><td>上位約6.7%</td></tr>
+      <tr><td>60〜64</td><td><span class="badge" style="background:#e8f5e9;color:#1b5e20">🥉 平均以上</span></td><td>上位約15.9%</td></tr>
+      <tr><td>50〜59</td><td><span class="badge" style="background:#f5f5f5;color:#444">📊 平均付近</span></td><td>上位約31〜50%</td></tr>
+      <tr><td>49以下</td><td><span class="badge" style="background:#f5f5f5;color:#888">📉 平均以下</span></td><td>下位50%以下</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section-card">
+  <h2><span class="h2bar"></span><span class="h2icon">❓</span>よくある質問（FAQ）</h2>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span class="qmark">Q</span>
+        標準偏差がわからない場合はどうすればいいですか？
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">標準偏差は学校や予備校の成績表に記載されていることがほとんどです。記載がない場合は担当の先生に確認してください。一般的な模擬試験では標準偏差は10〜20程度であることが多く、偏差値 計算の目安として「15」を仮の値として使うことも一般的です。クラス全員の点数データがあれば、エクセルやスプレッドシートのSTDEV関数で計算することもできます。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span class="qmark">Q</span>
+        平均点と同じ点数だった場合、偏差値はいくつになりますか？
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">個人の点数と平均点が同じ場合、計算式の「点数 − 平均点」がゼロになるため、偏差値は必ず<strong style="color:#90e0ef">50</strong>になります。偏差値とは常に平均を50として相対的な位置を示す指標であるため、平均点＝偏差値50は偏差値 計算の基本ルールです。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span class="qmark">Q</span>
+        偏差値が70や80を超えることはありますか？
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">計算式上は上限がないため、理論的には偏差値80や90も計算できます。ただし、現実の試験では偏差値75を超えることは非常にまれで、上位約0.6%に相当する極めて高いレベルです。偏差値とは相対的な指標なので、受験者全体の実力が高い試験では同じ点数でも偏差値が下がることがあります。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span class="qmark">Q</span>
+        標準偏差が0のときに偏差値 計算できないのはなぜですか？
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">標準偏差が0ということは、全員がまったく同じ点数を取ったことを意味します。この場合、計算式でゼロ除算が発生するため偏差値を計算できません。また、全員が同一点数であれば偏差値という相対的な比較自体が意味を持ちません。このツールでは標準偏差が0以下の値が入力された場合にエラーメッセージを表示します。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span class="qmark">Q</span>
+        偏差値と百分位（パーセンタイル）はどう違いますか？
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">百分位（パーセンタイル）は「自分より低い点数の人が全体の何%いるか」を直接示す指標です。一方、偏差値とは平均を50として標準化した相対的スコアです。正規分布を前提とした場合、偏差値60は上位約15.9%（84.1パーセンタイル）に相当します。偏差値は主に日本の教育現場で使われる独自の指標です。</div>
+    </div>
+  </div>
+</div>
 
 <footer>
-  <p>偏差値計算ツール — 無料・登録不要 · 計算式：偏差値 = 50 + 10 × (点数 − 平均点) ÷ 標準偏差</p>
+  <p>偏差値計算ツール — 無料 · 登録不要 · 計算式：偏差値 = 50 + 10 × (点数 − 平均点) ÷ 標準偏差</p>
 </footer>
 
+</div>
 <script>
-  function calculate() {
-    // Clear previous state
-    const inputs = ['avg', 'score', 'sd'];
-    inputs.forEach(id => {
-      document.getElementById(id).classList.remove('error');
-      document.getElementById('err-' + id).style.display = 'none';
-    });
-    document.getElementById('error-area').style.display = 'none';
-    document.getElementById('result-area').style.display = 'none';
-
-    const avgEl   = document.getElementById('avg');
-    const scoreEl = document.getElementById('score');
-    const sdEl    = document.getElementById('sd');
-
-    const avgVal   = avgEl.value.trim();
-    const scoreVal = scoreEl.value.trim();
-    const sdVal    = sdEl.value.trim();
-
-    let hasError = false;
-
-    if (avgVal === '') {
-      avgEl.classList.add('error');
-      document.getElementById('err-avg').style.display = 'block';
-      hasError = true;
-    }
-    if (scoreVal === '') {
-      scoreEl.classList.add('error');
-      document.getElementById('err-score').style.display = 'block';
-      hasError = true;
-    }
-    if (sdVal === '') {
-      sdEl.classList.add('error');
-      document.getElementById('err-sd').style.display = 'block';
-      hasError = true;
-    }
-
-    if (hasError) return;
-
-    const avg   = parseFloat(avgVal);
-    const score = parseFloat(scoreVal);
-    const sd    = parseFloat(sdVal);
-
-    if (isNaN(avg) || isNaN(score) || isNaN(sd)) {
-      showError('数値として正しい値を入力してください。');
-      return;
-    }
-    if (sd <= 0) {
-      sdEl.classList.add('error');
-      showError('標準偏差は0より大きい値を入力してください。標準偏差が0の場合、偏差値を計算できません。');
-      return;
-    }
-
-    const hensachi = 50 + 10 * (score - avg) / sd;
-    const rounded  = Math.round(hensachi * 10) / 10;
-
-    displayResult(rounded, avg, score, sd);
-  }
-
-  function showError(msg) {
-    const el = document.getElementById('error-area');
-    el.textContent = '⚠ ' + msg;
-    el.style.display = 'block';
-  }
-
-  function displayResult(hensachi, avg, score, sd) {
-    document.getElementById('result-value').textContent = hensachi.toFixed(1);
-
-    // Bar: map 20-80 range to 0-100%
-    const pct = Math.min(100, Math.max(0, ((hensachi - 20) / 60) * 100));
-    setTimeout(() => {
-      document.getElementById('result-bar').style.width = pct + '%';
-    }, 50);
-
-    // Rank
-    const rankEl = document.getElementById('result-rank');
-    let rankText, rankClass;
-    if (hensachi >= 75) {
-      rankText = '🏆 超難関レベル（上位約0.6%）'; rankClass = 'rank-s';
-    } else if (hensachi >= 70) {
-      rankText = '🥇 難関レベル（上位約2.3%）'; rankClass = 'rank-a';
-    } else if (hensachi >= 65) {
-      rankText = '🥈 やや難関（上位約6.7%）'; rankClass = 'rank-b';
-    } else if (hensachi >= 60) {
-      rankText = '🥉 平均以上（上位約15.9%）'; rankClass = 'rank-c';
-    } else if (hensachi >= 55) {
-      rankText = '📊 やや平均以上（上位約30.9%）'; rankClass = 'rank-d';
-    } else if (hensachi >= 45) {
-      rankText = '📊 平均付近'; rankClass = 'rank-e';
-    } else if (hensachi >= 40) {
-      rankText = '📉 やや平均以下'; rankClass = 'rank-e';
-    } else {
-      rankText = '📉 平均以下'; rankClass = 'rank-e';
-    }
-    rankEl.textContent = rankText;
-    rankEl.className = 'result-rank ' + rankClass;
-
-    // Detail
-    const diff = score - avg;
-    const sign = diff >= 0 ? '+' : '';
-    document.getElementById('result-detail').innerHTML =
-      `平均点との差：${sign}${diff.toFixed(1)} 点 　／　` +
-      `標準偏差：${sd} 　／　` +
-      `計算式：50 + 10 × (${score} − ${avg}) ÷ ${sd} = <strong>${hensachi.toFixed(2)}</strong>`;
-
-    const area = document.getElementById('result-area');
-    area.style.display = 'block';
-    area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function toggleFaq(btn) {
-    const item = btn.closest('.faq-item');
-    const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-    if (!isOpen) item.classList.add('open');
-  }
-
-  // Allow Enter key to trigger calculation
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') calculate();
+function calculate(){
+  ['avg','score','sd'].forEach(id=>{
+    document.getElementById(id).classList.remove('err');
+    document.getElementById('err-'+id).style.display='none';
   });
-</script>
+  document.getElementById('error-banner').style.display='none';
+  document.getElementById('result-area').style.display='none';
 
+  const avgEl=document.getElementById('avg');
+  const scoreEl=document.getElementById('score');
+  const sdEl=document.getElementById('sd');
+  let hasErr=false;
+  if(avgEl.value.trim()===''){avgEl.classList.add('err');document.getElementById('err-avg').style.display='block';hasErr=true;}
+  if(scoreEl.value.trim()===''){scoreEl.classList.add('err');document.getElementById('err-score').style.display='block';hasErr=true;}
+  if(sdEl.value.trim()===''){sdEl.classList.add('err');document.getElementById('err-sd').style.display='block';hasErr=true;}
+  if(hasErr)return;
+
+  const avg=parseFloat(avgEl.value);
+  const score=parseFloat(scoreEl.value);
+  const sd=parseFloat(sdEl.value);
+
+  if(isNaN(avg)||isNaN(score)||isNaN(sd)){
+    showErr('正しい数値を入力してください。');return;
+  }
+  if(sd<=0){
+    sdEl.classList.add('err');
+    showErr('標準偏差は0より大きい値を入力してください。標準偏差が0の場合、偏差値の計算はできません（ゼロ除算エラー）。');return;
+  }
+
+  const h=50+10*(score-avg)/sd;
+  const rounded=Math.round(h*10)/10;
+  showResult(rounded,avg,score,sd);
+}
+
+function showErr(msg){
+  const el=document.getElementById('error-banner');
+  el.textContent='⚠ '+msg;el.style.display='block';
+}
+
+function showResult(h,avg,score,sd){
+  document.getElementById('res-num').textContent=h.toFixed(1);
+  const pct=Math.min(100,Math.max(0,((h-20)/60)*100));
+  setTimeout(()=>document.getElementById('gauge').style.width=pct+'%',60);
+
+  const rb=document.getElementById('rank-badge');
+  let rc,rt;
+  if(h>=75){rc='rank-s';rt='🏆 超難関レベル（上位約0.6%）';}
+  else if(h>=70){rc='rank-a';rt='🥇 難関レベル（上位約2.3%）';}
+  else if(h>=65){rc='rank-b';rt='🥈 やや難関（上位約6.7%）';}
+  else if(h>=60){rc='rank-c';rt='🥉 平均以上（上位約15.9%）';}
+  else if(h>=55){rc='rank-d';rt='📊 やや平均以上（上位約30.9%）';}
+  else if(h>=45){rc='rank-e';rt='📊 平均付近';}
+  else if(h>=40){rc='rank-e';rt='📉 やや平均以下';}
+  else{rc='rank-e';rt='📉 平均以下';}
+  rb.className='rank-badge '+rc;rb.textContent=rt;
+
+  const diff=score-avg;const sign=diff>=0?'+':'';
+  document.getElementById('res-detail').innerHTML=
+    `平均との差：${sign}${diff.toFixed(1)} 点　／　標準偏差：${sd}　／　`+
+    `計算式：50 + 10 × (${score} − ${avg}) ÷ ${sd} = <strong>${h.toFixed(2)}</strong>`;
+
+  const ra=document.getElementById('result-area');
+  ra.style.display='block';
+  ra.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
+  const open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!open)item.classList.add('open');
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')calculate();});
+</script>
 </body>
 </html>
